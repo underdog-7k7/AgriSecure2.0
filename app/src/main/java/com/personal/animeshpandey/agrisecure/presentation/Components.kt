@@ -1,5 +1,6 @@
 package com.personal.animeshpandey.agrisecure.presentation
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.*
 import androidx.compose.animation.fadeIn
@@ -19,11 +20,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -32,11 +36,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.personal.animeshpandey.agrisecure.Data.bluetooth.FarmNotification
+import com.personal.animeshpandey.agrisecure.Util.unixTimestampToIndiaTimeZone
 import com.personal.animeshpandey.agrisecure.ui.theme.back1
 import com.personal.animeshpandey.agrisecure.ui.theme.back2
 import com.personal.animeshpandey.agrisecure.ui.theme.back3
@@ -50,7 +56,8 @@ fun AnimatedWeatherCard(
     temperature: String,
     pressure: String,
     rainfall: String,
-    soil: String
+    soil: String,
+    airQualityViewModel: AirQualityViewModel
 ) {
     var expanded by remember {
         mutableStateOf(false)
@@ -108,19 +115,54 @@ fun AnimatedWeatherCard(
                 .fillMaxWidth()
                 .background(color = Color.White, shape = RoundedCornerShape(16.dp)),){
                 AnimatedVisibility(visible = expanded) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-                        Text(text = "Other Metrics", color = back4, fontSize = 16.sp, fontStyle = FontStyle.Normal)
+                    Row(modifier = Modifier
+                        .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center){
+                        Card(modifier = Modifier.padding(4.dp), colors = CardDefaults.cardColors(containerColor = back4, contentColor = Color.White), shape = RoundedCornerShape(16.dp), elevation = CardDefaults.cardElevation(8.dp)) {
+                            Text(modifier = Modifier.padding(8.dp), text = "Other Metrics", color = Color.White, fontSize = 16.sp, fontStyle = FontStyle.Normal)
+                        }
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        Text("SO2: N.A", color = back4)
-                        Text("NO: N.A", color = back4)
-                        Text("NO2: N.A", color = back4)
-                        Text("P.M10: N.A", color = back4)
-                        Text("O3: N.A", color = back4)
+                    Spacer(modifier = Modifier.height(64.dp))
+
+                    if(airQualityViewModel.exposeddatastate.value.loading==false &&
+                        airQualityViewModel.exposeddatastate.value.error.toString()=="null"){
+                        val co = airQualityViewModel.exposeddatastate.value.recived_data.list?.get(0)?.components?.co.toString()
+                        val no = airQualityViewModel.exposeddatastate.value.recived_data.list?.get(0)?.components?.no.toString()
+                        val n02 = airQualityViewModel.exposeddatastate.value.recived_data.list?.get(0)?.components?.n02.toString()
+                        val o3 = airQualityViewModel.exposeddatastate.value.recived_data.list?.get(0)?.components?.o3.toString()
+                        val so2 = airQualityViewModel.exposeddatastate.value.recived_data.list?.get(0)?.components?.so2.toString()
+                        val nh3 = airQualityViewModel.exposeddatastate.value.recived_data.list?.get(0)?.components?.nh3.toString()
+                        val timestamp = airQualityViewModel.exposeddatastate.value.recived_data.list?.get(0)?.dt
+
+                        val datetime = unixTimestampToIndiaTimeZone(timestamp)
+                        
+                        Column(modifier = Modifier.padding(top = 48.dp, start = 8.dp, end = 8.dp),) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Carbon Monoxide: $co", color = back4)
+                            Text("Nitrogen Oxide: $no",color = back4)
+                            Text("Nitrogen Dioxide: $n02",color = back4)
+                            Text("Ozone: $o3",color = back4)
+                            Text("Sulphur Dioxide $so2",color = back4)
+                            Text("Ammonia: $nh3",color = back4)
+                            Text("Last Updated: $datetime", color = back4)
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
+                                Button(onClick = {
+                                    airQualityViewModel.getAirQuality()
+                                },
+                                    colors = ButtonDefaults.buttonColors(containerColor = back4, contentColor = Color.White)) {
+                                    Icon(Icons.Filled.Refresh, contentDescription = null)
+                                    Text(text = "Refresh")
+                                }
+                            }
+                        }
                     }
-
-
+                    else if(airQualityViewModel.exposeddatastate.value.loading==false &&
+                        airQualityViewModel.exposeddatastate.value.error==null){
+                        Text(text = "Error Fetching Data")
+                    }
+                    else if(airQualityViewModel.exposeddatastate.value.loading==true){
+                        CircularProgressIndicator()
+                    }
                 }
             }
         }

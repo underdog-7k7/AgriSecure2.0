@@ -12,6 +12,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
@@ -37,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -49,7 +52,12 @@ import com.personal.animeshpandey.agrisecure.ui.theme.back4
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun MainScreen(onBluetoothStateChanged: () -> Unit,viewModel:SensorDataViewModel = hiltViewModel(),navController: NavController){
+fun MainScreen(onBluetoothStateChanged: () -> Unit,
+               viewModel:SensorDataViewModel = hiltViewModel(),
+               navController: NavController,
+               airQualityViewModel: AirQualityViewModel
+               ){
+
 
     val scroll = rememberScrollState()
 
@@ -121,7 +129,7 @@ fun MainScreen(onBluetoothStateChanged: () -> Unit,viewModel:SensorDataViewModel
                             }
                         }
 
-                        AnimatedWeatherCard(temperature = "Fetching", pressure = "Fetching", rainfall = "Fetching", soil = "Fetching")
+                        AnimatedWeatherCard(temperature = "Fetching", pressure = "Fetching", rainfall = "Fetching", soil = "Fetching", airQualityViewModel = airQualityViewModel)
                     }
 
                 }
@@ -140,7 +148,7 @@ fun MainScreen(onBluetoothStateChanged: () -> Unit,viewModel:SensorDataViewModel
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        AnimatedWeatherCard(temperature = "Fetching", pressure = "Fetching", rainfall = "Fetching", soil = "Fetching")
+                        AnimatedWeatherCard(temperature = "Fetching", pressure = "Fetching", rainfall = "Fetching", soil = "Fetching", airQualityViewModel = airQualityViewModel)
                         Text(
                             text = viewModel.errorMessage!!
                         )
@@ -162,13 +170,17 @@ fun MainScreen(onBluetoothStateChanged: () -> Unit,viewModel:SensorDataViewModel
                             .fillMaxWidth()
                             .padding(16.dp), elevation = CardDefaults.cardElevation(defaultElevation = 8.dp), shape = CardDefaults.elevatedShape, colors = CardDefaults.cardColors(contentColor = Color.White, containerColor = back4)) {
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically){
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle, tint = Color.White, contentDescription = null
+                                )
                                 Text(
-                                        text = "Connected to Farm Module"
+                                        text = "Connected to Farm Module",
+                                        modifier = Modifier.padding(16.dp)
                                     )
                             }
                         }
 
-                        AnimatedWeatherCard(temperature = "Fetching", pressure = "Fetching", rainfall = "Fetching", soil = "Fetching")
+                        AnimatedWeatherCard(temperature = viewModel.temperature.toString(), pressure = viewModel.humidity.toString(), rainfall = viewModel.rain.toString(), soil = viewModel.soil.toString(), airQualityViewModel = airQualityViewModel)
                     }
                 }
 
@@ -176,7 +188,7 @@ fun MainScreen(onBluetoothStateChanged: () -> Unit,viewModel:SensorDataViewModel
                     Column(modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally) {
-                        AnimatedWeatherCard(temperature = "Fetching", pressure = "Fetching", rainfall = "Fetching", soil = "Fetching")
+                        AnimatedWeatherCard(temperature = "Fetching", pressure = "Fetching", rainfall = "Fetching", soil = "Fetching", airQualityViewModel = airQualityViewModel)
                         Button(onClick = {
                             viewModel.initializeConnection()
                         },

@@ -1,5 +1,6 @@
 package com.personal.animeshpandey.agrisecure.presentation
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -47,6 +48,7 @@ class SensorDataViewModel @Inject constructor(
                         humidity = result.data.humidity
                         rain = result.data.RainState
                         soil = result.data.SoilHydrogenics
+                        Log.d("BLUETOOTH DATA", rain.toString())
                     }
 
                     is Resource.Loading -> {

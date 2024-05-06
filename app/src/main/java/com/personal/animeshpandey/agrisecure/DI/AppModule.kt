@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 import com.personal.animeshpandey.agrisecure.Data.bluetooth.BLE.SensorDataManagerImpl
 import com.personal.animeshpandey.agrisecure.Data.bluetooth.SensorDataManager
+import com.personal.animeshpandey.agrisecure.presentation.AirQualityViewModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,4 +32,7 @@ object AppModule {
     ):SensorDataManager{
         return SensorDataManagerImpl(bluetoothadapter,context)
     }
+
+
+
 }
